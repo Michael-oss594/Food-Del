@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import './Add.css'
-import { assets } from '../../assets/assets'
+import { assets, url } from '../../assets/assets'
 
 const Add = () => {
 
-    const [image, setImage] = useState(false);
+    const [image, setImage] = useState(null);
     const [data, setData] = useState({
         name: "",
         description: "",
@@ -20,12 +20,38 @@ const Add = () => {
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();
+
+        if (!image) {
+            alert('Please select an image before submitting.');
+            return;
+        }
+
         const formData = new FormData();
         formData.append("name", data.name)
         formData.append("description", data.description)
         formData.append("price", Number(data.price))
         formData.append("category", data.category)
-        formData.append("image", data.image)
+        formData.append("image", image)
+
+        try {
+            const res = await fetch(`${url}/api/food/add`, {
+                method: 'POST',
+                body: formData
+            })
+            const result = await res.json();
+
+            if (result.success) {
+                alert('Food added successfully');
+                setData({ name: "", description: "", price: "", category: "Salad" })
+                setImage(null)
+            } else {
+                console.error(result)
+                alert(result.message || 'Failed to add food')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Upload failed. Please try again.')
+        }
     }
 
     return (
@@ -36,7 +62,7 @@ const Add = () => {
                     <label htmlFor="image">
                         <img src={image ? URL.createObjectURL(image) : assets.upload_area} alt="" />
                     </label>
-                    <input onChange={(e) => setImage(e.target.files[0])} type="file" id="image" hidden required />
+                    <input name="image" onChange={(e) => setImage(e.target.files[0])} type="file" id="image" hidden required />
                 </div>
                 <div className="add-product-name flex-col">
                     <p>Product name</p>
