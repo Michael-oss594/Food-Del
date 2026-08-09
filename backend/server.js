@@ -8,10 +8,18 @@ import foodRouter from "./routes/foodRoute.js"
 const app = express();
 const port = 4000;
 
+import path from "path";
+import { fileURLToPath } from "url";
+
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use('/images', express.static(path.join(__dirname, 'uploads')));
 
 // Debug middleware: log headers for upload requests
 app.use((req, res, next) => {

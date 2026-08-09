@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import './Add.css'
 import { assets, url } from '../../assets/assets'
+import axios from "axios"
+import { toast } from 'react-toastify'
 
 const Add = () => {
 
+    const url = "http://localhost:4000";
     const [image, setImage] = useState(null);
     const [data, setData] = useState({
         name: "",
@@ -32,25 +35,23 @@ const Add = () => {
         formData.append("price", Number(data.price))
         formData.append("category", data.category)
         formData.append("image", image)
-
         try {
-            const res = await fetch(`${url}/api/food/add`, {
-                method: 'POST',
-                body: formData
-            })
-            const result = await res.json();
-
-            if (result.success) {
-                alert('Food added successfully');
-                setData({ name: "", description: "", price: "", category: "Salad" })
-                setImage(null)
+            const response = await axios.post(`${url}/api/food/add`, formData);
+            if (response.data.success) {
+                setData({
+                    name: "",
+                    description: "",
+                    price: "",
+                    category: "Salad"
+                });
+                setImage(null);
+                toast.success(response.data.message);
             } else {
-                console.error(result)
-                alert(result.message || 'Failed to add food')
+                toast.error(response.data.message);
             }
         } catch (error) {
-            console.error(error)
-            alert('Upload failed. Please try again.')
+            console.error(error);
+            toast.error('Upload failed. Please try again.');
         }
     }
 
